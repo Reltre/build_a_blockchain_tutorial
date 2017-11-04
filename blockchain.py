@@ -1,7 +1,6 @@
 import hashlib
-import jason
+import json
 from time import time
-from uuid import uuid4
 
 class Blockchain(object):
 
