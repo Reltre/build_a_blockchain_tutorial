@@ -1,18 +1,16 @@
 import hashlib
-import jason
+import json
 from time import time
-from uuid import uuid4
 
 class Blockchain(object):
 
     def __init__(self):
         self.chain = []
         self.current_transactions = []
-
         # Create the genesis block
         self.new_block(previous_hash=1, proof=100)
 
-    def new_block(self):
+    def new_block(self, proof, previous_hash=None):
         """
         Create a new Block in the Blockchain
         :param proof: <int> The proof given by the Proof of Work algorithm
@@ -67,7 +65,7 @@ class Blockchain(object):
 
         # We must make sure the Dictionary is Ordered, or we'll have inconsistent hashes
         block_string = json.dumps(block, sort_keys=True).encode()
-        retrun hashlib.sha256(block_string).hexdigest()
+        return hashlib.sha256(block_string).hexdigest()
 
     def proof_of_work(self, last_proof):
         """
@@ -84,6 +82,36 @@ class Blockchain(object):
             proof += 1
 
         return proof
+
+    @staticmethod
+    def valid(self, chain):
+        """
+        Determine if a given blockchain is valid
+
+        :param chain: <list> A blockchain
+        :return: <bool> True if valid, False if not
+        """
+
+        last_block = chain[0]
+        current_index = 1
+
+        while current_index < len(chain):
+            block = chain[current_index]
+            print(f'{last_block}')
+            print(f'{block}')
+            print("\n----------\n")
+            # Check that the hash of the block is correct
+            if block['previous_hash'] != self.hash(last_block):
+                return False
+
+            # Check that the Proof of Work is correct
+            if not self.valid_proof(last_block['proof']), block['proof']):
+                return False
+
+            last_block = block
+            current_index += 1
+
+        return True
 
     @staticmethod
     def valid_proof(last_proof, proof):
