@@ -1,3 +1,5 @@
+from node import Node
+from network import Network
 import getopt, sys
 
 from textwrap import dedent
@@ -6,17 +8,12 @@ from flask import Flask, jsonify, request
 # Instantiates our Node
 app = Flask(__name__)
 
-# Instantiate this app instance's Node
-app_node = Node()
-# The netword where our nodes are stored, in a real world app this would be housed
-# in a separate module
-network = Network(app_node)
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
     blockchain = app_node.blockchain
     response = {
-        'chain': blockchain.chain
+        'chain': blockchain.chain,
         'length': len(blockchain.chain)
     }
 
@@ -38,7 +35,7 @@ def new_transaction():
     response = { 'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
 
-@app.route('/node/register', method=['POST'])
+@app.route('/node/register', methods=['POST'])
 def register_nodes():
     values = request.get_json()
 
@@ -103,4 +100,10 @@ def mine():
 
 if __name__ == '__main__':
     port = getopt.getopt(sys.argv[1:], "p:")
-    app.run(host='0.0.0.0', port=port[1])
+    port = port[0][0][1]
+    app.run(host='0.0.0.0', port=port)
+    # Instantiate this app instance's Node
+    app_node = Node(f'http://localhost:{port}')
+    # The netword where our nodes are stored, in a real world app this would be housed
+    # in a separate module
+    network = Network(app_node)
