@@ -1,4 +1,5 @@
 import requests
+from node import Node
 
 class Network(object):
 

@@ -7,7 +7,11 @@ from flask import Flask, jsonify, request
 
 # Instantiates our Node
 app = Flask(__name__)
-
+# Instantiate this app instance's Node
+app_node = Node('http://localhost:5000')
+# The netword where our nodes are stored, in a real world app this would be housed
+# in a separate module
+network = Network(app_node)
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
@@ -38,17 +42,20 @@ def new_transaction():
 @app.route('/node/register', methods=['POST'])
 def register_nodes():
     values = request.get_json()
-
     nodes = values.get('nodes')
+    addresses = []
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
 
-    for node in nodes:
-        network.register_node(node)
+    for current_node in nodes:
+        network.register_node(current_node)
+
+    for current_node in network.nodes:
+        addresses.append(current_node.raw_address)
 
     response = {
         'message': 'New nodes have been added',
-        'total_nodes': list(network.nodes),
+        'total_nodes': list(addresses),
     }
     return jsonify(response), 201
 
@@ -102,8 +109,3 @@ if __name__ == '__main__':
     port = getopt.getopt(sys.argv[1:], "p:")
     port = port[0][0][1]
     app.run(host='0.0.0.0', port=port)
-    # Instantiate this app instance's Node
-    app_node = Node(f'http://localhost:{port}')
-    # The netword where our nodes are stored, in a real world app this would be housed
-    # in a separate module
-    network = Network(app_node)
